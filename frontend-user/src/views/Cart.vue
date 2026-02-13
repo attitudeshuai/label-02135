@@ -12,15 +12,15 @@
 
     <template v-else>
       <div class="cart-list">
-        <van-swipe-cell v-for="item in cartStore.items" :key="item.id" :disabled="editing">
+        <van-swipe-cell v-for="item in cartStore.items" :key="item.specKey" :disabled="editing">
           <div class="cart-item">
-            <van-checkbox :model-value="item.checked" @click="cartStore.toggleCheck(item.id)" icon-size="20" checked-color="#ff6700" />
+            <van-checkbox :model-value="item.checked" @click="cartStore.toggleCheck(item.specKey)" icon-size="20" checked-color="#ff6700" />
             <div class="item-img" @click="$router.push(`/product/${item.id}`)">
-              <ProductImage :icon="item.icon" :size="80" />
+              <ProductImage :icon="item.icon" :image="item.image" :alt="item.name" :size="80" />
             </div>
             <div class="item-info">
               <div class="item-name">{{ item.name }}</div>
-              <div class="item-spec">黑色 / 12GB+256GB</div>
+              <div class="item-spec">{{ item.selectedColor || '黑色' }} / {{ item.selectedVersion || '12GB+256GB' }}</div>
               <div class="item-bottom">
                 <div class="item-price">
                   <span class="symbol">¥</span>
@@ -31,7 +31,7 @@
             </div>
           </div>
           <template #right>
-            <van-button square type="danger" text="删除" class="delete-btn" @click="cartStore.removeItem(item.id)" />
+            <van-button square type="danger" text="删除" class="delete-btn" @click="cartStore.removeItem(item.specKey)" />
           </template>
         </van-swipe-cell>
       </div>
@@ -40,7 +40,7 @@
         <SectionHeader title="为你推荐" />
         <div class="recommend-list">
           <div class="recommend-item" v-for="item in recommendProducts" :key="item.id" @click="$router.push(`/product/${item.id}`)">
-            <ProductImage :icon="item.icon" :size="80" />
+            <ProductImage :icon="item.icon" :image="item.image" :alt="item.name" :size="80" />
             <div class="recommend-name">{{ item.name }}</div>
             <div class="recommend-price">¥{{ item.price }}</div>
           </div>
@@ -77,7 +77,7 @@ const allChecked = computed({
 })
 
 function onCountChange(item) {
-  const result = cartStore.updateCount(item.id, item.count)
+  const result = cartStore.updateCount(item.specKey, item.count)
   if (result.message) {
     notify(result.message)
   }
@@ -121,7 +121,8 @@ function onSubmit() {
 .recommend-section { padding: 15px; background: #fff; margin: 10px; border-radius: 12px; }
 .recommend-list { display: flex; gap: 15px; overflow-x: auto; }
 .recommend-list::-webkit-scrollbar { display: none; }
-.recommend-item { flex-shrink: 0; width: 100px; text-align: center; }
+.recommend-item { flex-shrink: 0; width: 100px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+.recommend-item:active { transform: scale(0.95); }
 .recommend-name { font-size: 12px; color: #333; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recommend-price { font-size: 14px; color: #ff6700; font-weight: 500; margin-top: 4px; }
 

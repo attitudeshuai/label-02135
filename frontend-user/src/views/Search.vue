@@ -7,7 +7,7 @@
       <div class="history" v-if="history.length">
         <SectionHeader title="搜索历史">
           <template #right>
-            <van-icon name="delete-o" size="18" color="#999" @click="clearHistory" />
+            <van-icon name="delete-o" size="18" color="#999" @click="clearHistory" class="delete-icon" />
           </template>
         </SectionHeader>
         <div class="tags">
@@ -36,7 +36,7 @@
       </div>
       <div class="result-list">
         <div class="result-item" v-for="product in filteredProducts" :key="product.id" @click="goProduct(product.id)">
-          <ProductImage :icon="product.icon" :size="100" />
+          <ProductImage :icon="product.icon" :image="product.image" :alt="product.name" :size="100" />
           <div class="result-info">
             <div class="result-name">{{ product.name }}</div>
             <div class="result-desc">{{ product.desc }}</div>
@@ -122,6 +122,8 @@ function goProduct(id) {
 .search-content { padding: 15px; }
 
 .history { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+.history .delete-icon { cursor: pointer; transition: opacity 0.2s; }
+.history .delete-icon:active { opacity: 0.5; }
 .tags { display: flex; flex-wrap: wrap; gap: 10px; }
 .tag {
   padding: 8px 16px;
@@ -129,7 +131,10 @@ function goProduct(id) {
   border-radius: 20px;
   font-size: 13px;
   color: #666;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.tag:active { background: #eee; }
 
 .hot { background: #fff; padding: 15px; border-radius: 12px; }
 .hot-item {
@@ -138,7 +143,10 @@ function goProduct(id) {
   padding: 12px 0;
   border-bottom: 1px solid #f5f5f5;
   gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.hot-item:active { background: #f9f9f9; }
 .hot-item:last-child { border-bottom: none; }
 .hot-item .rank {
   width: 20px;
@@ -159,7 +167,10 @@ function goProduct(id) {
 .filter-bar span {
   font-size: 14px;
   color: #666;
+  cursor: pointer;
+  transition: color 0.2s;
 }
+.filter-bar span:active { opacity: 0.7; }
 .filter-bar span.active { color: #ff6700; font-weight: 500; }
 
 .result-list { padding: 10px; }
@@ -171,7 +182,10 @@ function goProduct(id) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
+.result-item:active { transform: scale(0.98); }
 .result-info { flex: 1; display: flex; flex-direction: column; }
 .result-name { font-size: 14px; font-weight: 500; color: #333; line-height: 1.4; }
 .result-desc { font-size: 12px; color: #999; margin: 6px 0; }

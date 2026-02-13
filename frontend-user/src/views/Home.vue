@@ -4,13 +4,14 @@
     <div class="header">
       <div class="logo">MI</div>
       <van-search v-model="searchVal" placeholder="Xiaomi 14 Ultra" shape="round" background="transparent" @click="$router.push('/search')" readonly />
-      <van-icon name="scan" size="22" color="#fff" />
+      <van-icon name="scan" size="22" color="#fff" class="scan-icon" @click="onScanClick" />
     </div>
 
     <!-- 轮播图 -->
     <van-swipe :autoplay="3000" indicator-color="#ff6700" class="banner-swipe">
       <van-swipe-item v-for="banner in banners" :key="banner.id">
         <div class="banner-img" :style="{ background: banner.color }">
+          <img :src="banner.image" :alt="banner.title" class="banner-real-img" @error="(e) => e.target.style.display='none'" />
           <div class="banner-text">
             <div class="banner-title">{{ banner.title }}</div>
             <div class="banner-desc">{{ banner.desc }}</div>
@@ -38,7 +39,7 @@
       </SectionHeader>
       <div class="flash-list">
         <div class="flash-item" v-for="item in flashSaleProducts" :key="item.id" @click="$router.push(`/product/${item.id}`)">
-          <ProductImage :icon="item.icon" :size="80" />
+          <ProductImage :icon="item.icon" :image="item.image" :alt="item.name" :size="80" />
           <div class="flash-name">{{ item.name }}</div>
           <div class="flash-price">¥{{ item.salePrice }}</div>
           <div class="flash-origin">¥{{ item.price }}</div>
@@ -67,6 +68,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { banners, categories, products, flashSaleProducts } from '../api/mock'
 import { ProductImage, SectionHeader, ProductCard } from '../components'
+import { notify } from '../utils/notify'
 
 const router = useRouter()
 const searchVal = ref('')
@@ -74,6 +76,10 @@ const countdown = ref(2 * 60 * 60 * 1000)
 
 function goCategory(index) {
   router.push({ path: '/category', query: { index } })
+}
+
+function onScanClick() {
+  notify('扫码功能开发中，敬请期待')
 }
 </script>
 
@@ -103,6 +109,9 @@ function goCategory(index) {
 .header :deep(.van-field__control::placeholder) { color: rgba(255, 255, 255, 0.8); }
 .header :deep(.van-icon-search) { color: rgba(255, 255, 255, 0.8); }
 
+.scan-icon { transition: opacity 0.2s; cursor: pointer; }
+.scan-icon:active { opacity: 0.6; }
+
 .banner-swipe {
   margin: 0 10px;
   border-radius: 12px;
@@ -116,9 +125,20 @@ function goCategory(index) {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.banner-text { text-align: center; color: #fff; }
+.banner-real-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner-text { text-align: center; color: #fff; position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
 .banner-title { font-size: 24px; font-weight: 600; }
 .banner-desc { font-size: 14px; margin-top: 8px; opacity: 0.9; }
 

@@ -14,7 +14,7 @@
         <div class="sub-title" v-if="categoryList[activeKey]">{{ categoryList[activeKey].name }}分类</div>
         <div class="sub-list" v-if="categoryList[activeKey]">
           <div class="sub-item" v-for="sub in categoryList[activeKey].children" :key="sub.id" @click="goSearch(sub.name)">
-            <ProductImage :icon="sub.icon" :size="60" />
+            <ProductImage :icon="sub.icon" :image="sub.image" :alt="sub.name" :size="60" />
             <span>{{ sub.name }}</span>
           </div>
         </div>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { categoryList } from '../api/mock'
 import { ProductImage } from '../components'
@@ -32,7 +32,11 @@ import { ProductImage } from '../components'
 const route = useRoute()
 const router = useRouter()
 const searchVal = ref('')
-const activeKey = ref(0)
+
+// 从 sessionStorage 恢复或使用路由参数
+const savedIndex = sessionStorage.getItem('categoryActiveKey')
+const initialIndex = route.query.index !== undefined ? parseInt(route.query.index) : (savedIndex ? parseInt(savedIndex) : 0)
+const activeKey = ref(initialIndex)
 
 const bannerColors = [
   'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -45,7 +49,13 @@ const bannerColors = [
   'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
 ]
 
+// 监听 activeKey 变化，保存到 sessionStorage
+watch(activeKey, (val) => {
+  sessionStorage.setItem('categoryActiveKey', val.toString())
+})
+
 onMounted(() => {
+  // 如果有路由参数，优先使用路由参数
   const index = route.query.index
   if (index !== undefined) {
     activeKey.value = parseInt(index)

@@ -20,11 +20,11 @@
 
     <!-- 商品列表 -->
     <div class="goods-section">
-      <div class="goods-item" v-for="item in cartStore.checkedItems" :key="item.id">
-        <ProductImage :icon="item.icon" :size="80" />
+      <div class="goods-item" v-for="item in cartStore.checkedItems" :key="item.specKey">
+        <ProductImage :icon="item.icon" :image="item.image" :alt="item.name" :size="80" />
         <div class="goods-info">
           <div class="goods-name">{{ item.name }}</div>
-          <div class="goods-spec">黑色 / 12GB+256GB</div>
+          <div class="goods-spec">{{ item.selectedColor || '黑色' }} / {{ item.selectedVersion || '12GB+256GB' }}</div>
           <div class="goods-bottom">
             <span class="goods-price">¥{{ item.price }}</span>
             <span class="goods-count">x{{ item.count }}</span>
@@ -141,7 +141,7 @@ function onSubmit() {
   if (result.success) {
     // 清空已选商品
     cartStore.checkedItems.forEach(item => {
-      cartStore.removeItem(item.id)
+      cartStore.removeItem(item.specKey)
     })
     
     confirm({

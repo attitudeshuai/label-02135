@@ -59,7 +59,9 @@ export const useCartStore = defineStore('cart', () => {
         return { success: false, message: '商品信息无效' }
       }
 
-      const existing = items.value.find(item => item.id === product.id)
+      // 使用 id + 规格 组合作为唯一标识
+      const specKey = product.specKey || `${product.id}`
+      const existing = items.value.find(item => item.specKey === specKey)
       if (existing) {
         const validation = validateCartCount(existing.count + 1, MIN_CART_COUNT, MAX_CART_COUNT)
         if (!validation.valid) {
@@ -67,10 +69,10 @@ export const useCartStore = defineStore('cart', () => {
           return { success: false, message: validation.message }
         }
         existing.count = validation.value
-        logger.info(MODULE, '商品数量已更新', { id: product.id, count: existing.count })
+        logger.info(MODULE, '商品数量已更新', { id: product.id, specKey, count: existing.count })
       } else {
-        items.value.push({ ...product, count: 1, checked: true })
-        logger.info(MODULE, '商品已添加到购物车', { id: product.id, name: product.name })
+        items.value.push({ ...product, specKey, count: 1, checked: true })
+        logger.info(MODULE, '商品已添加到购物车', { id: product.id, specKey, name: product.name })
       }
       
       saveCart()
@@ -82,16 +84,16 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   // 删除商品
-  function removeItem(id) {
+  function removeItem(specKey) {
     try {
-      const index = items.value.findIndex(item => item.id === id)
+      const index = items.value.findIndex(item => item.specKey === specKey)
       if (index > -1) {
         const removed = items.value.splice(index, 1)[0]
-        logger.info(MODULE, '商品已从购物车移除', { id, name: removed.name })
+        logger.info(MODULE, '商品已从购物车移除', { specKey, name: removed.name })
         saveCart()
         return { success: true }
       }
-      logger.warn(MODULE, '删除商品失败：商品不存在', { id })
+      logger.warn(MODULE, '删除商品失败：商品不存在', { specKey })
       return { success: false, message: '商品不存在' }
     } catch (error) {
       logger.error(MODULE, '删除商品异常', error)
@@ -100,22 +102,22 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   // 更新数量
-  function updateCount(id, count) {
+  function updateCount(specKey, count) {
     try {
       const validation = validateCartCount(count, MIN_CART_COUNT, MAX_CART_COUNT)
-      const item = items.value.find(item => item.id === id)
+      const item = items.value.find(item => item.specKey === specKey)
       
       if (!item) {
-        logger.warn(MODULE, '更新数量失败：商品不存在', { id })
+        logger.warn(MODULE, '更新数量失败：商品不存在', { specKey })
         return { success: false, message: '商品不存在' }
       }
 
       if (!validation.valid) {
         item.count = validation.value
-        logger.warn(MODULE, '数量已调整到边界值', { id, count: validation.value, message: validation.message })
+        logger.warn(MODULE, '数量已调整到边界值', { specKey, count: validation.value, message: validation.message })
       } else {
         item.count = validation.value
-        logger.debug(MODULE, '商品数量已更新', { id, count: validation.value })
+        logger.debug(MODULE, '商品数量已更新', { specKey, count: validation.value })
       }
       
       saveCart()
@@ -127,12 +129,12 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   // 切换选中状态
-  function toggleCheck(id) {
+  function toggleCheck(specKey) {
     try {
-      const item = items.value.find(item => item.id === id)
+      const item = items.value.find(item => item.specKey === specKey)
       if (item) {
         item.checked = !item.checked
-        logger.debug(MODULE, '商品选中状态已切换', { id, checked: item.checked })
+        logger.debug(MODULE, '商品选中状态已切换', { specKey, checked: item.checked })
         saveCart()
       }
     } catch (error) {

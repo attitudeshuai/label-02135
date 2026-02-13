@@ -11,7 +11,7 @@
             <span>{{ userStore.userInfo.level }}</span>
           </div>
         </div>
-        <van-icon name="setting-o" size="22" color="#fff" class="setting-icon" />
+        <van-icon name="setting-o" size="22" color="#fff" class="setting-icon" @click="notify('设置功能开发中')" />
       </div>
       <div class="user-info guest" v-else @click="$router.push('/login')">
         <van-image round width="70" height="70" src="https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg" class="avatar" />
@@ -22,19 +22,19 @@
         <van-icon name="arrow" size="20" color="#fff" />
       </div>
       <div class="stats">
-        <div class="stat-item">
+        <div class="stat-item" @click="handleStatClick('积分')">
           <div class="stat-num">{{ userStore.isLoggedIn ? '128' : '0' }}</div>
           <div class="stat-label">积分</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" @click="handleStatClick('优惠券')">
           <div class="stat-num">{{ userStore.isLoggedIn ? '3' : '0' }}</div>
           <div class="stat-label">优惠券</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" @click="handleStatClick('收藏')">
           <div class="stat-num">{{ userStore.isLoggedIn ? '12' : '0' }}</div>
           <div class="stat-label">收藏</div>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" @click="handleStatClick('足迹')">
           <div class="stat-num">{{ userStore.isLoggedIn ? '5' : '0' }}</div>
           <div class="stat-label">足迹</div>
         </div>
@@ -111,9 +111,21 @@ function getOrderBadge(status) {
   return count || ''
 }
 
+function handleStatClick(type) {
+  if (!userStore.isLoggedIn) {
+    router.push('/login')
+    return
+  }
+  notify(type + '功能开发中')
+}
+
 function goOrderList(status) {
   if (!userStore.isLoggedIn) {
     router.push('/login')
+    return
+  }
+  if (status === 0) {
+    notify('退换/售后功能开发中')
     return
   }
   router.push({ path: '/order/list', query: status ? { status } : {} })
@@ -174,7 +186,8 @@ function handleLogout() {
   font-size: 12px;
   margin-top: 8px;
 }
-.setting-icon { position: absolute; top: 45px; right: 20px; }
+.setting-icon { position: absolute; top: 45px; right: 20px; cursor: pointer; transition: opacity 0.2s; }
+.setting-icon:active { opacity: 0.6; }
 
 .stats {
   position: relative;
@@ -186,7 +199,8 @@ function handleLogout() {
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
-.stat-item { text-align: center; }
+.stat-item { text-align: center; cursor: pointer; transition: opacity 0.2s; }
+.stat-item:active { opacity: 0.7; }
 .stat-num { font-size: 20px; font-weight: 600; color: #333; }
 .stat-label { font-size: 12px; color: #999; margin-top: 4px; }
 
@@ -206,7 +220,8 @@ function handleLogout() {
 .section-header .more { font-size: 12px; color: #999; }
 
 .order-tabs { display: flex; justify-content: space-around; }
-.order-tab { text-align: center; }
+.order-tab { text-align: center; cursor: pointer; transition: opacity 0.2s; }
+.order-tab:active { opacity: 0.7; }
 .tab-icon { position: relative; display: inline-block; }
 .tab-icon .badge {
   position: absolute;

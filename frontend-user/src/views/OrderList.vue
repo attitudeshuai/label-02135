@@ -18,11 +18,11 @@
         </div>
         
         <div class="order-goods">
-          <div class="goods-item" v-for="item in order.items" :key="item.id" @click="$router.push(`/product/${item.id}`)">
-            <ProductImage :icon="item.icon" :size="70" />
+          <div class="goods-item" v-for="(item, idx) in order.items" :key="idx" @click="$router.push(`/product/${item.id}`)">
+            <ProductImage :icon="item.icon" :image="item.image" :alt="item.name" :size="70" />
             <div class="goods-info">
               <div class="goods-name">{{ item.name }}</div>
-              <div class="goods-spec">黑色 / 12GB+256GB</div>
+              <div class="goods-spec">{{ item.selectedColor || '黑色' }} / {{ item.selectedVersion || '12GB+256GB' }}</div>
               <div class="goods-bottom">
                 <span class="goods-price">¥{{ item.price }}</span>
                 <span class="goods-count">x{{ item.count }}</span>
@@ -122,7 +122,10 @@ function viewLogistics(order) {
   display: flex;
   gap: 10px;
   padding: 8px 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
+.goods-item:active { opacity: 0.7; }
 
 .goods-info { flex: 1; }
 

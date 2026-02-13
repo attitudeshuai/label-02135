@@ -48,7 +48,10 @@ export const useOrderStore = defineStore('order', () => {
           name: item.name,
           price: item.price,
           count: item.count,
-          icon: item.icon
+          icon: item.icon,
+          image: item.image,
+          selectedColor: item.selectedColor,
+          selectedVersion: item.selectedVersion
         })),
         address: { ...address },
         totalPrice,

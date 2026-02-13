@@ -1,7 +1,7 @@
 <template>
   <div class="product-card" @click="$emit('click')">
     <div class="card-img">
-      <ProductImage :icon="product.icon" :size="imgSize" />
+      <ProductImage :icon="product.icon" :image="product.image" :alt="product.name" :size="imgSize" />
       <span class="card-tag" v-if="tag">{{ tag }}</span>
     </div>
     <div class="card-info">

@@ -2,14 +2,14 @@
   <div class="product" v-if="product">
     <van-nav-bar title="商品详情" left-arrow @click-left="$router.back()" fixed placeholder>
       <template #right>
-        <van-icon name="share-o" size="20" />
+        <van-icon name="share-o" size="20" @click="onShare" />
       </template>
     </van-nav-bar>
     
     <van-swipe :autoplay="3000" indicator-color="#ff6700" class="product-swipe">
       <van-swipe-item v-for="i in 3" :key="i">
         <div class="product-img">
-          <ProductImage :icon="product.icon" :size="200" />
+          <ProductImage :icon="product.icon" :image="product.image" :alt="product.name" :size="200" />
         </div>
       </van-swipe-item>
     </van-swipe>
@@ -41,18 +41,18 @@
           <span class="cell-value">{{ selectedColor }} / {{ selectedVersion }}</span>
         </template>
       </van-cell>
-      <van-cell is-link>
+      <van-cell is-link @click="goSelectAddress">
         <template #title>
           <span class="cell-label">配送</span>
-          <span class="cell-value">北京市 朝阳区</span>
+          <span class="cell-value">{{ selectedAddress || '请选择配送地址' }}</span>
         </template>
       </van-cell>
       <van-cell>
         <template #title>
           <span class="cell-label">服务</span>
           <div class="service-tags">
-            <span><van-icon name="certificate" color="#ff6700" /> 正品保证</span>
-            <span><van-icon name="shield-o" color="#ff6700" /> 7天退货</span>
+            <span @click="notify('正品保证：小米官方直营，品质保障')"><van-icon name="certificate" color="#ff6700" /> 正品保证</span>
+            <span @click="notify('7天无理由退货，请放心购买')"><van-icon name="shield-o" color="#ff6700" /> 7天退货</span>
           </div>
         </template>
       </van-cell>
@@ -65,7 +65,7 @@
       </div>
       <div class="detail-content" v-show="activeTab === 'detail'">
         <div class="detail-img" v-for="i in 3" :key="i">
-          <ProductImage :icon="product.icon" :size="150" />
+          <ProductImage :icon="product.icon" :image="product.image" :alt="product.name" :size="150" />
           <span>{{ product.name }} 详情展示 {{ i }}</span>
         </div>
       </div>
@@ -78,9 +78,9 @@
     </div>
 
     <van-action-bar class="action-bar">
-      <van-action-bar-icon icon="chat-o" text="客服" />
+      <van-action-bar-icon icon="chat-o" text="客服" @click="notify('在线客服功能开发中')" />
       <van-action-bar-icon icon="cart-o" text="购物车" :badge="cartStore.totalCount || ''" @click="$router.push('/cart')" />
-      <van-action-bar-icon :icon="collected ? 'star' : 'star-o'" :text="collected ? '已收藏' : '收藏'" :color="collected ? '#ff6700' : ''" @click="collected = !collected" />
+      <van-action-bar-icon :icon="collected ? 'star' : 'star-o'" :text="collected ? '已收藏' : '收藏'" :color="collected ? '#ff6700' : ''" @click="toggleCollect" />
       <van-action-bar-button type="warning" text="加入购物车" @click="addToCart" />
       <van-action-bar-button type="danger" text="立即购买" @click="buyNow" />
     </van-action-bar>
@@ -88,7 +88,7 @@
     <van-action-sheet v-model:show="showSpec" title="选择规格">
       <div class="spec-sheet">
         <div class="spec-header">
-          <ProductImage :icon="product.icon" :size="80" />
+          <ProductImage :icon="product.icon" :image="product.image" :alt="product.name" :size="80" />
           <div class="spec-info">
             <div class="spec-price">¥{{ product.price }}</div>
             <div class="spec-selected">已选：{{ selectedColor }} {{ selectedVersion }}</div>
@@ -113,10 +113,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../store/cart'
 import { useUserStore } from '../store/user'
+import { useAddressStore } from '../store/address'
 import { products } from '../api/mock'
 import { ProductImage } from '../components'
 import { notify, notifySuccess } from '../utils/notify'
@@ -127,6 +128,7 @@ const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
 const userStore = useUserStore()
+const addressStore = useAddressStore()
 
 const product = computed(() => products.find(p => p.id === Number(route.params.id)))
 const activeTab = ref('detail')
@@ -134,6 +136,18 @@ const showSpec = ref(false)
 const collected = ref(false)
 const selectedColor = ref('黑色')
 const selectedVersion = ref('12GB+256GB')
+
+// 临时选中的地址
+const tempSelectedAddress = ref(null)
+
+const selectedAddress = computed(() => {
+  // 优先使用临时选中的地址
+  if (tempSelectedAddress.value) {
+    return `${tempSelectedAddress.value.city} ${tempSelectedAddress.value.district}`
+  }
+  const addr = addressStore.defaultAddress
+  return addr ? `${addr.city} ${addr.district}` : '北京市 朝阳区'
+})
 
 const colors = ['黑色', '白色', '绿色', '紫色']
 const versions = ['8GB+128GB', '8GB+256GB', '12GB+256GB', '12GB+512GB']
@@ -147,6 +161,19 @@ const specs = [
   { label: '后置相机', value: '5000万像素主摄' }
 ]
 
+function toggleCollect() {
+  collected.value = !collected.value
+  notifySuccess(collected.value ? '已收藏' : '已取消收藏')
+}
+
+function onShare() {
+  notify('分享功能开发中')
+}
+
+function goSelectAddress() {
+  router.push({ path: '/address', query: { select: 'true', from: 'product', productId: route.params.id } })
+}
+
 function addToCart() {
   if (!userStore.isLoggedIn) {
     notify('请先登录')
@@ -155,10 +182,17 @@ function addToCart() {
   }
   
   if (product.value) {
-    const result = cartStore.addItem(product.value)
+    const specKey = `${product.value.id}_${selectedColor.value}_${selectedVersion.value}`
+    const cartItem = {
+      ...product.value,
+      specKey,
+      selectedColor: selectedColor.value,
+      selectedVersion: selectedVersion.value
+    }
+    const result = cartStore.addItem(cartItem)
     if (result.success) {
       notifySuccess('已加入购物车')
-      logger.info(MODULE, '商品已加入购物车', { id: product.value.id })
+      logger.info(MODULE, '商品已加入购物车', { id: product.value.id, specKey })
     } else {
       notify(result.message, 'error')
     }
@@ -175,6 +209,22 @@ function buyNow() {
   addToCart()
   router.push('/cart')
 }
+
+// 检查是否有从地址页面返回选中的地址
+function checkSelectedAddress() {
+  const savedAddr = localStorage.getItem('selectedAddress')
+  if (savedAddr) {
+    try {
+      tempSelectedAddress.value = JSON.parse(savedAddr)
+      localStorage.removeItem('selectedAddress')
+    } catch (e) {
+      // ignore
+    }
+  }
+}
+
+onMounted(checkSelectedAddress)
+onActivated(checkSelectedAddress)
 </script>
 
 <style scoped>
@@ -215,7 +265,8 @@ function buyNow() {
 .cell-label { color: #999; font-size: 13px; margin-right: 15px; }
 .cell-value { color: #333; font-size: 13px; }
 .service-tags { display: flex; gap: 15px; font-size: 12px; color: #666; flex-wrap: wrap; }
-.service-tags span { display: flex; align-items: center; gap: 4px; }
+.service-tags span { display: flex; align-items: center; gap: 4px; cursor: pointer; transition: opacity 0.2s; }
+.service-tags span:active { opacity: 0.6; }
 
 .detail-section { background: #fff; margin-top: 10px; }
 .detail-tabs {
@@ -228,7 +279,10 @@ function buyNow() {
   font-size: 14px;
   color: #666;
   position: relative;
+  cursor: pointer;
+  transition: color 0.2s;
 }
+.detail-tabs span:active { opacity: 0.7; }
 .detail-tabs span.active {
   color: #ff6700;
   font-weight: 500;
@@ -281,7 +335,10 @@ function buyNow() {
   border-radius: 20px;
   font-size: 13px;
   color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+.spec-options span:active { transform: scale(0.95); }
 .spec-options span.active {
   border-color: #ff6700;
   color: #ff6700;
