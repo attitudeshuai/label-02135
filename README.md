@@ -38,7 +38,37 @@ npm run build
 
 # 预览生产构建
 npm run preview
+
+# 运行单元测试
+npm run test
+
+# 运行单元测试并生成覆盖率报告
+npm run test:coverage
 ```
+
+### 测试说明
+
+项目已集成 **Vitest** + **Vue Test Utils** 测试框架，支持：
+
+- 单元测试：测试工具函数和组件
+- 覆盖率统计：使用 v8 引擎生成详细的覆盖率报告
+- 测试文件位置：`__tests__/` 目录
+
+#### 测试示例
+
+项目已包含两个示例测试文件：
+
+1. `__tests__/validator.test.js` - 测试 `src/utils/validator.js` 工具函数
+2. `__tests__/ProductCard.test.js` - 测试 `src/components/ProductCard.vue` 组件
+
+#### 覆盖率报告
+
+运行 `npm run test:coverage` 后会在项目根目录生成 `coverage/` 文件夹，包含：
+- `index.html` - HTML格式的可视化覆盖率报告
+- `lcov-report/` - 详细的覆盖率分析
+- `lcov.info` - 标准格式的覆盖率数据
+
+覆盖率配置见 `vitest.config.js`，默认排除路由和入口文件。
 
 ## Services
 
