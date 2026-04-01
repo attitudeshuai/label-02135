@@ -38,7 +38,89 @@ npm run build
 
 # 预览生产构建
 npm run preview
+
+# 运行单元测试（watch模式）
+npm run test
+
+# 运行单元测试（单次执行）
+npm run test:run
+
+# 运行单元测试并生成覆盖率报告
+npm run test:coverage
+
+# 运行单元测试（UI界面）
+npm run test:ui
 ```
+
+## 单元测试工程化
+
+本项目已集成 **Vitest + Vue Test Utils** 实现完整的前端测试工程化方案：
+
+### 技术栈
+
+| 工具 | 用途 | 版本 |
+|------|------|------|
+| Vitest | 测试运行器、断言库 | ^1.6.0 |
+| Vue Test Utils | Vue组件测试工具库 | 最新 |
+| happy-dom | DOM模拟环境 | ^14.0.0 |
+| @vitest/coverage-v8 | 覆盖率统计 | ^1.6.0 |
+
+### 测试命令说明
+
+| 命令 | 说明 | 输出 |
+|------|------|------|
+| `npm run test` | 启动开发模式测试，文件修改自动重跑 | 控制台实时输出 |
+| `npm run test:run` | CI/CD环境单次执行所有测试 | 控制台测试报告 |
+| `npm run test:coverage` | 执行测试并统计代码覆盖率 | `coverage/` 目录下HTML/JSON报告 |
+| `npm run test:ui` | 启动可视化测试UI界面 | 浏览器界面 |
+
+### 测试文件规范
+
+```
+src/
+├── components/
+│   └── __tests__/          # 组件测试目录
+│       └── *.test.js       # 组件单元测试
+├── store/
+│   └── __tests__/          # Store测试目录
+│       └── *.test.js       # Pinia状态管理测试
+├── utils/
+│   └── __tests__/          # 工具函数测试目录
+│       └── *.test.js       # 纯函数单元测试
+└── views/
+    └── __tests__/          # 页面组件测试目录
+        └── *.test.js       # 页面集成测试
+```
+
+### 已实现的测试示例
+
+1. **工具函数单元测试** - `src/utils/__tests__/validator.test.js`
+   - 覆盖所有输入校验场景（手机号、密码、购物车数量、搜索关键词）
+   - 代码覆盖率：100%
+
+2. **Vue组件测试** - `src/components/__tests__/ProductImage.test.js`
+   - 组件Props渲染验证
+   - 条件渲染分支覆盖
+   - UI组件Mock策略
+
+3. **Pinia状态管理测试** - `src/store/__tests__/cart.test.js`
+   - 购物车核心业务流程（增删改查、全选、价格计算）
+   - 边界条件验证（数量限制1-99）
+   - 代码覆盖率：80.87%
+
+### 覆盖率统计配置
+
+在 `vite.config.js` 中已配置：
+- **统计范围**：`src/**/*.{js,vue}`
+- **排除文件**：路由配置、入口文件、Mock数据
+- **报告格式**：控制台文本、HTML可视化、JSON
+
+### 最佳实践
+
+1. **纯函数优先**：工具逻辑抽离为纯函数，易于测试
+2. **组件隔离**：使用 `stubs` Mock第三方UI组件（如Vant）
+3. **环境隔离**：每个测试用例独立创建Pinia实例
+4. **边界覆盖**：重点测试空值、极值、异常场景
 
 ## Services
 
