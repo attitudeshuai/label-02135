@@ -38,7 +38,63 @@ npm run build
 
 # 预览生产构建
 npm run preview
+
+# 运行测试（开发模式，监听文件变化）
+npm run test
+
+# 运行测试（单次运行）
+npm run test:run
+
+# 运行测试并生成覆盖率报告
+npm run test:coverage
 ```
+
+## 单元测试工程化配置
+
+本项目已集成 Vitest + Vue Test Utils 测试框架，支持单元测试和覆盖率统计。
+
+### 技术栈
+
+- **Vitest**: 基于 Vite 的下一代单元测试框架
+- **Vue Test Utils**: Vue 官方组件测试库
+- **jsdom**: Node.js 环境下的 DOM 模拟
+- **v8**: V8 引擎覆盖率采集
+
+### 测试目录结构
+
+```
+frontend-user/src/
+├── test/
+│   └── setup.js              # 测试全局配置
+├── components/
+│   └── __tests__/            # 组件测试目录
+│       └── ProductImage.test.js
+└── utils/
+    └── __tests__/            # 工具函数测试目录
+        └── validator.test.js
+```
+
+### 测试命令说明
+
+| 命令 | 说明 |
+|------|------|
+| `npm run test` | 启动开发模式测试，监听文件变化，支持热更新 |
+| `npm run test:run` | 单次运行所有测试，适合 CI 环境 |
+| `npm run test:coverage` | 运行测试并生成覆盖率报告 |
+
+### 覆盖率报告
+
+运行 `npm run test:coverage` 后会生成三种格式的报告：
+- **text**: 控制台直接输出
+- **json**: JSON 格式数据，位于 `coverage/` 目录
+- **html**: HTML 可视化报告，位于 `coverage/` 目录，可在浏览器中打开查看
+
+### 编写测试建议
+
+1. **工具函数测试**: 放在对应目录的 `__tests__` 文件夹下，重点测试边界条件
+2. **组件测试**: 重点测试 Props、事件、渲染结果、用户交互
+3. **测试命名**: 使用 `xxx.test.js` 命名规范
+4. **测试原则**: 每个测试用例只验证一个功能点
 
 ## Services
 
