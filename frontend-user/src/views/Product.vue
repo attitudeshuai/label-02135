@@ -80,7 +80,14 @@
     <van-action-bar class="action-bar">
       <van-action-bar-icon icon="chat-o" text="客服" @click="notify('在线客服功能开发中')" />
       <van-action-bar-icon icon="cart-o" text="购物车" :badge="cartStore.totalCount || ''" @click="$router.push('/cart')" />
-      <van-action-bar-icon :icon="collected ? 'star' : 'star-o'" :text="collected ? '已收藏' : '收藏'" :color="collected ? '#ff6700' : ''" @click="toggleCollect" />
+      <van-action-bar-icon :icon="isCollected ? 'star' : 'star-o'" :text="isCollected ? '已收藏' : '收藏'" :color="isCollected ? '#ff6700' : ''" @click="toggleCollect">
+        <template #icon>
+          <div class="favorite-icon-wrapper">
+            <van-icon :name="isCollected ? 'star' : 'star-o'" :size="22" :color="isCollected ? '#ff6700' : ''" />
+            <div v-if="isCollected" class="favorite-badge">♥</div>
+          </div>
+        </template>
+      </van-action-bar-icon>
       <van-action-bar-button type="warning" text="加入购物车" @click="addToCart" />
       <van-action-bar-button type="danger" text="立即购买" @click="buyNow" />
     </van-action-bar>
@@ -118,6 +125,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../store/cart'
 import { useUserStore } from '../store/user'
 import { useAddressStore } from '../store/address'
+import { useFavoriteStore } from '../store/favorite'
 import { products } from '../api/mock'
 import { ProductImage } from '../components'
 import { notify, notifySuccess } from '../utils/notify'
@@ -129,11 +137,11 @@ const router = useRouter()
 const cartStore = useCartStore()
 const userStore = useUserStore()
 const addressStore = useAddressStore()
+const favoriteStore = useFavoriteStore()
 
 const product = computed(() => products.find(p => p.id === Number(route.params.id)))
 const activeTab = ref('detail')
 const showSpec = ref(false)
-const collected = ref(false)
 const selectedColor = ref('黑色')
 const selectedVersion = ref('12GB+256GB')
 
@@ -161,9 +169,23 @@ const specs = [
   { label: '后置相机', value: '5000万像素主摄' }
 ]
 
+const isCollected = computed(() => favoriteStore.isFavorite(Number(route.params.id)))
+
 function toggleCollect() {
-  collected.value = !collected.value
-  notifySuccess(collected.value ? '已收藏' : '已取消收藏')
+  if (!userStore.isLoggedIn) {
+    notify('请先登录')
+    router.push({ path: '/login', query: { redirect: route.fullPath } })
+    return
+  }
+  
+  if (product.value) {
+    const result = favoriteStore.toggleFavorite(product.value)
+    if (result.success) {
+      notifySuccess(isCollected.value ? '已取消收藏' : '已收藏')
+    } else {
+      notify(result.message, 'error')
+    }
+  }
 }
 
 function onShare() {
@@ -343,5 +365,25 @@ onActivated(checkSelectedAddress)
   border-color: #ff6700;
   color: #ff6700;
   background: #fff5f0;
+}
+
+.favorite-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.favorite-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  font-size: 12px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 </style>
