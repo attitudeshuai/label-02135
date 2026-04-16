@@ -67,6 +67,7 @@
     </div>
 
     <van-cell-group inset class="menu-group">
+      <van-cell title="我的收藏" is-link icon="star-o" @click="goFavorites" />
       <van-cell title="收货地址" is-link icon="location-o" @click="goAddress" />
       <van-cell title="账户安全" is-link icon="shield-o" @click="notify('账户安全功能开发中')" />
       <van-cell title="帮助中心" is-link icon="question-o" @click="notify('帮助中心功能开发中')" />
@@ -116,7 +117,11 @@ function handleStatClick(type) {
     router.push('/login')
     return
   }
-  notify(type + '功能开发中')
+  if (type === '收藏') {
+    router.push('/favorites')
+  } else {
+    notify(type + '功能开发中')
+  }
 }
 
 function goOrderList(status) {
@@ -137,6 +142,14 @@ function goAddress() {
     return
   }
   router.push('/address')
+}
+
+function goFavorites() {
+  if (!userStore.isLoggedIn) {
+    router.push('/login')
+    return
+  }
+  router.push('/favorites')
 }
 
 function handleService(service) {
