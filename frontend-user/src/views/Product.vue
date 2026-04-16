@@ -80,7 +80,14 @@
     <van-action-bar class="action-bar">
       <van-action-bar-icon icon="chat-o" text="客服" @click="notify('在线客服功能开发中')" />
       <van-action-bar-icon icon="cart-o" text="购物车" :badge="cartStore.totalCount || ''" @click="$router.push('/cart')" />
-      <van-action-bar-icon :icon="collected ? 'star' : 'star-o'" :text="collected ? '已收藏' : '收藏'" :color="collected ? '#ff6700' : ''" @click="toggleCollect" />
+      <van-action-bar-icon class="favorite-icon" :class="{ 'is-favorite': collected }" :icon="collected ? 'star' : 'star-o'" :text="collected ? '已收藏' : '收藏'" :color="collected ? '#ff6700' : ''" @click="toggleCollect">
+        <template #icon>
+          <div class="icon-wrapper">
+            <van-icon :name="collected ? 'star' : 'star-o'" :size="22" />
+            <van-icon v-if="collected" name="success" size="10" class="success-badge" />
+          </div>
+        </template>
+      </van-action-bar-icon>
       <van-action-bar-button type="warning" text="加入购物车" @click="addToCart" />
       <van-action-bar-button type="danger" text="立即购买" @click="buyNow" />
     </van-action-bar>
@@ -118,6 +125,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../store/cart'
 import { useUserStore } from '../store/user'
 import { useAddressStore } from '../store/address'
+import { useFavoriteStore } from '../store/favorite'
 import { products } from '../api/mock'
 import { ProductImage } from '../components'
 import { notify, notifySuccess } from '../utils/notify'
@@ -129,11 +137,12 @@ const router = useRouter()
 const cartStore = useCartStore()
 const userStore = useUserStore()
 const addressStore = useAddressStore()
+const favoriteStore = useFavoriteStore()
 
 const product = computed(() => products.find(p => p.id === Number(route.params.id)))
 const activeTab = ref('detail')
 const showSpec = ref(false)
-const collected = ref(false)
+const collected = computed(() => product.value ? favoriteStore.isFavorite(product.value.id) : false)
 const selectedColor = ref('黑色')
 const selectedVersion = ref('12GB+256GB')
 
@@ -162,8 +171,15 @@ const specs = [
 ]
 
 function toggleCollect() {
-  collected.value = !collected.value
-  notifySuccess(collected.value ? '已收藏' : '已取消收藏')
+  if (!userStore.isLoggedIn) {
+    notify('请先登录')
+    router.push({ path: '/login', query: { redirect: route.fullPath } })
+    return
+  }
+  if (product.value) {
+    const result = favoriteStore.toggleFavorite(product.value)
+    notifySuccess(result.message)
+  }
 }
 
 function onShare() {
@@ -321,6 +337,33 @@ onActivated(checkSelectedAddress)
 .spec-value { flex: 1; color: #333; font-size: 13px; }
 
 .action-bar { box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); }
+
+.favorite-icon {
+  transition: all 0.3s ease;
+}
+
+.favorite-icon.is-favorite {
+  transform: scale(1.05);
+}
+
+.favorite-icon.is-favorite :deep(.van-action-bar-icon__text) {
+  color: #ff6700;
+  font-weight: 500;
+}
+
+.icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.success-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #fff;
+  border-radius: 50%;
+  color: #07c160;
+}
 
 .spec-sheet { padding: 20px; }
 .spec-header { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; }

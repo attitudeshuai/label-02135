@@ -31,7 +31,7 @@
           <div class="stat-label">优惠券</div>
         </div>
         <div class="stat-item" @click="handleStatClick('收藏')">
-          <div class="stat-num">{{ userStore.isLoggedIn ? '12' : '0' }}</div>
+          <div class="stat-num">{{ userStore.isLoggedIn ? favoriteStore.count : '0' }}</div>
           <div class="stat-label">收藏</div>
         </div>
         <div class="stat-item" @click="handleStatClick('足迹')">
@@ -84,11 +84,13 @@
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../store/user'
 import { useOrderStore } from '../store/order'
+import { useFavoriteStore } from '../store/favorite'
 import { notify, notifySuccess, confirm } from '../utils/notify'
 
 const router = useRouter()
 const userStore = useUserStore()
 const orderStore = useOrderStore()
+const favoriteStore = useFavoriteStore()
 
 const orderTabs = [
   { icon: 'pending-payment', text: '待付款', status: 1 },
@@ -99,6 +101,7 @@ const orderTabs = [
 ]
 
 const services = [
+  { icon: 'star-o', text: '我的收藏', path: '/favorites' },
   { icon: 'coupon-o', text: '优惠券' },
   { icon: 'gift-o', text: '我的礼品' },
   { icon: 'vip-card-o', text: '会员中心' },
@@ -114,6 +117,10 @@ function getOrderBadge(status) {
 function handleStatClick(type) {
   if (!userStore.isLoggedIn) {
     router.push('/login')
+    return
+  }
+  if (type === '收藏') {
+    router.push('/favorites')
     return
   }
   notify(type + '功能开发中')
@@ -140,6 +147,14 @@ function goAddress() {
 }
 
 function handleService(service) {
+  if (service.path) {
+    if (!userStore.isLoggedIn) {
+      router.push('/login')
+      return
+    }
+    router.push(service.path)
+    return
+  }
   notify(service.text + '功能开发中')
 }
 
