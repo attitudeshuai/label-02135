@@ -8,6 +8,7 @@ const routes = [
   { path: '/product/:id', component: () => import('../views/Product.vue') },
   { path: '/search', component: () => import('../views/Search.vue') },
   { path: '/login', component: () => import('../views/Login.vue') },
+  { path: '/favorites', component: () => import('../views/Favorites.vue'), meta: { requiresAuth: true } },
   { path: '/order/confirm', component: () => import('../views/OrderConfirm.vue'), meta: { requiresAuth: true } },
   { path: '/order/list', component: () => import('../views/OrderList.vue'), meta: { requiresAuth: true } },
   { path: '/address', component: () => import('../views/AddressList.vue'), meta: { requiresAuth: true } }

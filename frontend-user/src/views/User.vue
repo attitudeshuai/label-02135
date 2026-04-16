@@ -99,10 +99,14 @@ const orderTabs = [
 ]
 
 const services = [
+  { icon: 'star-o', text: '我的收藏', route: '/favorites' },
   { icon: 'coupon-o', text: '优惠券' },
   { icon: 'gift-o', text: '我的礼品' },
   { icon: 'vip-card-o', text: '会员中心' },
-  { icon: 'service-o', text: '在线客服' }
+  { icon: 'service-o', text: '在线客服' },
+  { icon: 'clock-o', text: '浏览记录' },
+  { icon: 'setting-o', text: '设置' },
+  { icon: 'question-o', text: '帮助中心' }
 ]
 
 function getOrderBadge(status) {
@@ -114,6 +118,10 @@ function getOrderBadge(status) {
 function handleStatClick(type) {
   if (!userStore.isLoggedIn) {
     router.push('/login')
+    return
+  }
+  if (type === '收藏') {
+    router.push('/favorites')
     return
   }
   notify(type + '功能开发中')
@@ -140,6 +148,14 @@ function goAddress() {
 }
 
 function handleService(service) {
+  if (service.route) {
+    if (!userStore.isLoggedIn) {
+      router.push('/login')
+      return
+    }
+    router.push(service.route)
+    return
+  }
   notify(service.text + '功能开发中')
 }
 
